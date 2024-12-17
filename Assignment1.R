@@ -7,6 +7,7 @@ library(tidyr)
 library(gmodels)
 library(reshape2)
 
+
 #### setup ####
 setwd('/Users/aoikawahara/Library/CloudStorage/OneDrive-KULeuven/Leuven/04_Event History Analysis/Assignment/Workplace')
 getwd()
@@ -14,8 +15,10 @@ getwd()
 data <- read_sav("FFS_ThirdBirthPPF_Assignment.sav")
 CrossTable(data$EXP_LINE,data$BIRTH3)
 
+
 #### 1a ####
 # Excel file
+
 
 #### 1b ####
 data <- data %>%
@@ -31,6 +34,7 @@ data$logitht_obs <- log(data$ht_obs/(1-data$ht_obs))
 #### 1c #####
 # Excel file
 
+
 #### 2a ####
 # constant specification
 glm1 = glm(BIRTH3 ~ 1, data=data, family=binomial(link = "logit"))
@@ -40,7 +44,10 @@ data$predl.glm1 = predict.glm(glm1)
 data$predo.glm1 = exp(data$predl.glm1)
 data$predp.glm1 = data$predo.glm1/(1+data$predo.glm1)
 
-ggplot(data, aes(as.numeric(EXP_LINE), predp.glm1)) + geom_line() + theme_bw()
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm1)) +
+  geom_line(aes(y = ht_obs, group = 1), color = "blue") +
+  geom_line(aes(y = predp.glm1, group = 1), color = "darkolivegreen") +
+  theme_bw()
 
 
 # linear specification
@@ -58,9 +65,7 @@ ggplot(data, aes(x = EXP_LINE)) +
 
 
 # quadratic specification
-data$t2 <- as.numeric(data$EXP_LINE)^2
-
-glm3 = glm(BIRTH3 ~ 1 + EXP_LINE + t2, data=data, family=binomial(link = "logit"))
+glm3 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD, data=data, family=binomial(link = "logit"))
 summary(glm3)
 
 data$predl.glm3 = predict.glm(glm3)
@@ -74,9 +79,9 @@ ggplot(data, aes(x = EXP_LINE)) +
 
 
 # cubic specification
-data$t3 <- as.numeric(data$EXP_LINE)^3
+data$EXP_CUBE <- as.numeric(data$EXP_LINE)^3
 
-glm4 = glm(BIRTH3 ~ 1 + EXP_LINE + t2 + t3, data=data, family=binomial(link = "logit"))
+glm4 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE, data=data, family=binomial(link = "logit"))
 summary(glm4)
 
 data$predl.glm4 = predict.glm(glm4)
@@ -90,9 +95,9 @@ ggplot(data, aes(x = EXP_LINE)) +
 
 
 # 4th-order polynomial
-data$t4 <- as.numeric(data$EXP_LINE)^4
+data$EXP_4TH <- as.numeric(data$EXP_LINE)^4
 
-glm5 = glm(BIRTH3 ~ 1 + EXP_LINE + t2 + t3 + t4, data=data, family=binomial(link = "logit"))
+glm5 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH, data=data, family=binomial(link = "logit"))
 summary(glm5)
 
 data$predl.glm5 = predict.glm(glm5)
@@ -114,9 +119,9 @@ data$predo.glm6 = exp(data$predl.glm6)
 data$predp.glm6 = data$predo.glm6/(1+data$predo.glm6)
 
 ggplot(data, aes(x = EXP_LINE)) +
-  geom_line(aes(y = ht_obs, group = 1), color = "blue") +
   geom_line(aes(y = predp.glm6, group = 1), color = "darkolivegreen") +
   theme_minimal()
+
 
 # step function - 分岐点調整中
 crosstab = table(data$EXP_LINE,data$EXP_CAT4)
@@ -134,6 +139,7 @@ ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = predp.glm7, group = 1), color = "red") +   # Connected line for ht_cte
   theme_minimal()
 
+
 # plot all the estimated models
 ggplot(data, aes(as.numeric(EXP_LINE), predp.glm1)) + geom_line() + theme_bw() + 
   geom_line(aes(y = predp.glm2), color = "blue") + 
@@ -144,7 +150,6 @@ ggplot(data, aes(as.numeric(EXP_LINE), predp.glm1)) + geom_line() + theme_bw() +
 
 
 #### 2b ####
-
 # constant
 test_glm1glm6 <- anova(glm1,glm6, test = "LRT")
 print(test_glm1glm6)
@@ -177,21 +182,27 @@ print(test_glm4glm5)
 test_glm5glm6 <- anova(glm5,glm6, test = "LRT")
 print(test_glm5glm6)
 
+
 #### 2c ####
+table(data$AGEKID2, useNA="always")
+
 # Calculate mean of BIRTH3 by exposure
 data <- data %>%
   group_by(AGEKID2) %>%
   mutate(ht_agekid2 = mean(BIRTH3, na.rm = TRUE)) %>%
   ungroup()
 
-ggplot(data, aes(AGEKID2,ht_agekid2)) + geom_line() +  theme_bw()
+ggplot(data, aes(AGEKID2,ht_agekid2)) +
+  geom_line() +
+  theme_bw()
 
 data$a2 = data$AGEKID2^2
 data$a3 = data$AGEKID2^3
 data$a4 = data$AGEKID2^4
 
+
 # 4th-order polynomial model
-glm5age = glm(BIRTH3 ~ 1 + EXP_LINE + t2 + t3 + t4 + AGEKID2 + a2 + a3 + a4, data=data, family=binomial(link = "logit"))
+glm5age = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2 + a2 + a3 + a4, data=data, family=binomial(link = "logit"))
 summary(glm5age)
 
 data$predl.glm5age = predict.glm(glm5age)
@@ -201,7 +212,10 @@ data$predp.glm5age = data$predo.glm5age/(1+data$predo.glm5age)
 test_glm5glm5age <- anova(glm5,glm5age, test = "LRT")
 print(test_glm5glm5age)
 
-ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age, linetype=as.factor(AGEKID2))) + geom_line() + theme_bw()
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age, linetype=as.factor(AGEKID2))) +
+  geom_line() +
+  theme_bw()
+
 
 #### 2d ####
 data$ASTATUS4 <- factor(data$ASTATUS4,levels=c(1,2,3,4,5), 
@@ -210,11 +224,70 @@ data$ASTATUS4 <- factor(data$ASTATUS4,levels=c(1,2,3,4,5),
 data.substatus <- subset(data, as.numeric(ASTATUS4) != "NA")
 table(data.substatus$ASTATUS4, useNA="always")
 
-glm5sta = glm(BIRTH3 ~ 1 + EXP_LINE + t2 + t3 + t4 + ASTATUS4 , data=data.substatus, family=binomial(link = "logit"))
+glm5sta = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + ASTATUS4 , data=data.substatus, family=binomial(link = "logit"))
 summary(glm5sta)
 
-# likelihood ratio test
+data.substatus$predl.glm5sta = predict.glm(glm5sta)
+data.substatus$predo.glm5sta = exp(data.substatus$predl.glm5sta)
+data.substatus$predp.glm5sta = data.substatus$predo.glm5sta/(1+data.substatus$predo.glm5sta)
 
+ggplot(data.substatus, aes(as.numeric(EXP_LINE), predp.glm5sta, linetype=as.factor(ASTATUS4))) +
+  geom_line() +
+  theme_bw()
+
+
+# Since LRT assumes the people in the models are the same,
+# the number of cases must be the same across the models.
+
+
+# 4th-order polynomial specification with subset data
+glm5sub = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH, data=data.substatus, family=binomial(link = "logit"))
+summary(glm5sub)
+
+test_glm5subglm5sta <- anova(glm5sub,glm5sta, test = "LRT")
+print(test_glm5subglm5sta)
 
 #### 2e ####
+# model with both age and status
+glm5netfull = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
+                 AGEKID2 + a2 + a3 + a4 +
+                 ASTATUS4,
+               data=data.substatus, family=binomial(link = "logit"))
+summary(glm5netfull)
 
+
+# 4th-order polynomial specification with subset data only with age
+glm5netage = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
+                   AGEKID2 + a2 + a3 + a4,
+                 data=data.substatus, family=binomial(link = "logit"))
+summary(glm5netage)
+
+
+# likelihood ratio test
+test_glm5netfullglm5netage <- anova(glm5netage,glm5netfull, test = "LRT")
+print(test_glm5netfullglm5netage)
+
+test_glm5netfullglm5sta <- anova(glm5sta,glm5netfull, test = "LRT")
+print(test_glm5netfullglm5sta)
+
+
+#### 2f ####
+glm5netfull$devres <- residuals(glm5netfull, "deviance")
+
+plot(glm5netfull$devres,
+     xlab = "Person-Period",
+     ylab = "Deviance Residuals")
+
+glm5netfull$ssdevres <- tapply(glm5netfull$devres^2, data.substatus$NR, sum)
+
+plot(glm5netfull$ssdevres,
+     xlab = "Identification Number",
+     ylab = "Sum of Squared Residuals")
+
+
+#### 2g ####
+glm5netfull_cloglog = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
+                    AGEKID2 + a2 + a3 + a4 +
+                    ASTATUS4,
+                  data=data.substatus, family=binomial(link = "cloglog"))
+summary(glm5netfull_cloglog)
