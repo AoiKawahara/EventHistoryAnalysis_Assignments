@@ -127,7 +127,7 @@ ggplot(data, aes(x = EXP_LINE)) +
 crosstab = table(data$EXP_LINE,data$EXP_CAT4)
 print(crosstab)
 
-glm7 = glm(BIRTH3 ~ 1 + t4 + as.factor(EXP_CAT4) , data=data, family=binomial(link = "logit"))
+glm7 = glm(BIRTH3 ~ 1 + as.factor(EXP_CAT4) + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH, data=data, family=binomial(link = "logit"))
 summary(glm7)
 
 data$predl.glm7 = predict.glm(glm7)
@@ -182,6 +182,13 @@ print(test_glm4glm5)
 test_glm5glm6 <- anova(glm5,glm6, test = "LRT")
 print(test_glm5glm6)
 
+# step function
+
+test_glm6glm7 <- anova(glm6, glm7, test = "LRT")
+print(test_glm6glm7)
+
+test_glm5glm7 <- anova(glm5, glm7, test = "LRT")
+print(test_glm5glm7)
 
 #### 2c ####
 table(data$AGEKID2, useNA="always")
@@ -212,7 +219,7 @@ data$predp.glm5age = data$predo.glm5age/(1+data$predo.glm5age)
 test_glm5glm5age <- anova(glm5,glm5age, test = "LRT")
 print(test_glm5glm5age)
 
-ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age, linetype=as.factor(AGEKID2))) +
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age, color=as.factor(AGEKID2))) +
   geom_line() +
   theme_bw()
 
@@ -247,6 +254,7 @@ summary(glm5sub)
 test_glm5subglm5sta <- anova(glm5sub,glm5sta, test = "LRT")
 print(test_glm5subglm5sta)
 
+
 #### 2e ####
 # model with both age and status
 glm5netfull = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
@@ -254,7 +262,6 @@ glm5netfull = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
                  ASTATUS4,
                data=data.substatus, family=binomial(link = "logit"))
 summary(glm5netfull)
-
 
 # 4th-order polynomial specification with subset data only with age
 glm5netage = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
@@ -284,6 +291,7 @@ plot(glm5netfull$ssdevres,
      xlab = "Identification Number",
      ylab = "Sum of Squared Residuals")
 
+glm5netfull$ssdevres
 
 #### 2g ####
 glm5netfull_cloglog = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
