@@ -14,11 +14,9 @@ getwd()
 
 data <- read_sav("QASS General & Cause-specific Mortality.sav")
 
-
 #### 1a ####
 table <- table(data$MONTH_CONT,data$DEATH)
 table
-
 
 #### 1b ####
 # create actuarial life-table
@@ -65,7 +63,6 @@ s.hat.steps <- stepfun(interval, c(1, actuarial.s))
 plot(s.hat.steps, do.points = FALSE, xlim = c(0, 40), 
      ylab = "Actuarial Survival", xlab = "Time", main = "")
 
-
 #### 1c ####
 KM1 <- survfit(Surv(data$MONTH_CONT, data$DEATH) ~ 1, data = data) 
 options(max.print=20000)
@@ -81,14 +78,12 @@ plot(KM1, conf.int=F, mark.time=T, col=1, lty=1, lwd=1, ylim = c(0.9,1),
 # cumulative hazard function -ln(S(t))
 plot(KM1, fun="cumhaz", ylim=c(0,0.1), conf.int=F)
 
-
 #### 1d ####
 logcumhaz <- function(y) {
   to.return <- log(-log(y))
   return(to.return)
 }
 plot(KM1, fun=logcumhaz, conf.int=F)  # log cumulative hazard ln(-ln(S(t)))
-
 
 #### 1e ####
 cox1 <- coxph(Surv(data$MONTH_CONT, data$DEATH) ~ 1, data = data)
@@ -103,6 +98,10 @@ plotmartingale +
   scale_color_discrete(name="DEATH", label=c("No", "Yes")) +
   ylab("Martingale Residuals") +
   xlab("AGE") +
+  theme_bw()
+
+ggplot(data, aes(AGE, cox1res)) +
+  geom_line() +
   theme_bw()
 
 # simple regression of martingale residuals
@@ -125,7 +124,6 @@ ggplot(data, aes(AGE, loessvalues)) +
   geom_line() +
   theme_bw()
 
-
 #### 2b ####
 coxAge <- coxph(Surv(data$MONTH_CONT, data$DEATH) ~ 1 + AGE, data = data)
 summary(coxAge)
@@ -133,25 +131,56 @@ summary(coxAge)
 test_cox1coxAge <- anova(cox1,coxAge, test = "LRT")
 print(test_cox1coxAge)
 
-
 #### 2c ####
 coxAge.partial <- resid(coxAge, "schoenfeld")
-View(coxAge.partial)
+coxAge.partial
 
+data.partial <- subset(data, CENSOR!= 1)
+
+# simple regression of partial residuals
+resmodel_coxAge = lm(coxAge.partial ~ AGE, data = data.partial)
+summary(resmodel_coxAge)
+
+reslinear_coxAge = predict(resmodel_coxAge)
+
+ggplot(data.partial, aes(AGE, reslinear_coxAge)) +
+  geom_line() +
+  theme_bw()
+
+# loess smooth of partial residuals
+loessmodel_coxAge = loess(coxAge.partial ~ AGE, data = data.partial)
+summary(loessmodel_coxAge)
+
+loessvalues_coxAge = predict(loessmodel_coxAge)
+
+ggplot(data.partial, aes(AGE, loessvalues_coxAge)) +
+  geom_line() +
+  theme_bw()
 
 #### 2d ####
 KMedu <- survfit(Surv(MONTH_CONT, DEATH) ~ 1 + EDUCATION, data = data)
 summary(KMedu)
 
 # survivor function
-plot(KMedu, xlab="Time", ylab="S(t)", conf.int=F, mark.time=T, col=c(2,3,4,5,6), lty=1, lwd=1, ylim = c(0.85,1))
+plot(KMedu, xlab="Time", ylab="S(t)", conf.int=F, mark.time=F, col=c(2,3,4,5,6), lty=1, lwd=1, ylim = c(0.85,1))
+legend(x = "bottomleft",
+       legend=c("EDUCATION = 1", "EDUCATION = 2", "EDUCATION = 3", "EDUCATION = 4", "EDUCATION = 5"),
+       col=c(2,3,4,5,6),
+       lty=c(1,1))
 
 # cumulative hazard function
 plot(KMedu, fun="cumhaz", xlab="Time", ylab="H(t)=-ln[S(t)]", ylim=c(0,0.12), col=c(2,3,4,5,6), conf.int=F)
+legend(x = "topleft",
+       legend=c("EDUCATION = 1", "EDUCATION = 2", "EDUCATION = 3", "EDUCATION = 4", "EDUCATION = 5"),
+       col=c(2,3,4,5,6),
+       lty=c(1,1))
 
 # log cumulative hazard function
 plot(KMedu, fun=logcumhaz, , xlab="Time", ylab="Log[H(t)]", ylim=c(-8,-2), conf.int=F, mark.time=F, col=c(2,3,4,5,6))
-
+legend(x = "bottomright",
+       legend=c("EDUCATION = 1", "EDUCATION = 2", "EDUCATION = 3", "EDUCATION = 4", "EDUCATION = 5"),
+       col=c(2,3,4,5,6),
+       lty=c(1,1))
 
 #### 2e ####
 coxEdu <- coxph(Surv(data$MONTH_CONT, data$DEATH) ~ 1 + EDUCATION, data = data)
@@ -180,7 +209,6 @@ legend(x = "topleft",
        legend=c("EDUCATION = 1", "EDUCATION = 2", "EDUCATION = 3", "EDUCATION = 4", "EDUCATION = 5"),
        col=c("red", "orange", "yellow", "lightgreen", "blue"), lty=c(1,1))
 
-
 # log cumulative hazard function
 plot(survfit(coxEdu, newdata = data.frame(EDUCATION = 1)),
      conf.int = FALSE,
@@ -200,7 +228,6 @@ lines(survfit(coxEdu, newdata = data.frame(EDUCATION = 5)),
 legend(x = "bottomright",
        legend=c("EDUCATION = 1", "EDUCATION = 2", "EDUCATION = 3", "EDUCATION = 4", "EDUCATION = 5"),
        col=c("red", "orange", "yellow", "lightgreen", "blue"), lty=c(1,1))
-
 
 #### 2f ####
 coxAgeEdu <- coxph(Surv(data$MONTH_CONT, data$DEATH) ~ 1 + AGE + EDUCATION, data = data)
