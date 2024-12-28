@@ -133,28 +133,19 @@ print(test_cox1coxAge)
 
 #### 2c ####
 coxAge.partial <- resid(coxAge, "schoenfeld")
-coxAge.partial
+summary(coxAge.partial)
 
 data.partial <- subset(data, CENSOR!= 1)
+data.partial <- data.frame(data.partial, coxAge.partial)
+data.partial$RANK <- rank(data.partial$MONTH_CONT, na.last = TRUE, ties.method = "first")
 
-# simple regression of partial residuals
-resmodel_coxAge = lm(coxAge.partial ~ AGE, data = data.partial)
-summary(resmodel_coxAge)
-
-reslinear_coxAge = predict(resmodel_coxAge)
-
-ggplot(data.partial, aes(AGE, reslinear_coxAge)) +
-  geom_line() +
-  theme_bw()
-
-# loess smooth of partial residuals
-loessmodel_coxAge = loess(coxAge.partial ~ AGE, data = data.partial)
+loessmodel_coxAge = loess(coxAge.partial ~ RANK, data = data.partial)
 summary(loessmodel_coxAge)
+data.partial$loessvalues_coxAge = predict(loessmodel_coxAge)
 
-loessvalues_coxAge = predict(loessmodel_coxAge)
-
-ggplot(data.partial, aes(AGE, loessvalues_coxAge)) +
-  geom_line() +
+ggplot(data.partial, aes(x = RANK)) +
+  geom_point(aes(y = coxAge.partial), size = 0.5) +
+  geom_line(aes(y = loessvalues_coxAge)) +
   theme_bw()
 
 #### 2d ####
