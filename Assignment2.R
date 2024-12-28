@@ -183,7 +183,7 @@ print(test_cox1coxEdu)
 # cumulative hazard function
 plot(survfit(coxEdu, newdata = data.frame(EDUCATION = 1)),
      conf.int = FALSE,
-     col="red", fun="cumhaz", ylim=c(0,0.15))
+     col="red", fun="cumhaz", ylim=c(0,0.12))
 lines(survfit(coxEdu, newdata = data.frame(EDUCATION = 2)),
       conf.int = FALSE,
       col="orange", fun="cumhaz")
@@ -203,7 +203,7 @@ legend(x = "topleft",
 # log cumulative hazard function
 plot(survfit(coxEdu, newdata = data.frame(EDUCATION = 1)),
      conf.int = FALSE,
-     col="red", fun=logcumhaz, ylim=c(-10,-1))
+     col="red", fun=logcumhaz, ylim=c(-10,-2))
 lines(survfit(coxEdu, newdata = data.frame(EDUCATION = 2)),
       conf.int = FALSE,
       col="orange", fun=logcumhaz)
