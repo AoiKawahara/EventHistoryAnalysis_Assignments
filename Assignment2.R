@@ -180,6 +180,23 @@ summary(coxEdu)
 test_cox1coxEdu <- anova(cox1,coxEdu, test = "LRT")
 print(test_cox1coxEdu)
 
+coxEdu.partial <- resid(coxEdu, "schoenfeld")
+summary(coxEdu.partial)
+
+data.partial.Edu <- subset(data, CENSOR!= 1)
+data.partial.Edu <- data.frame(data.partial.Edu, coxEdu.partial)
+data.partial.Edu$RANK <- rank(data.partial.Edu$MONTH_CONT, na.last = TRUE, ties.method = "first")
+
+loessmodel_coxEdu = loess(coxEdu.partial ~ RANK, data = data.partial.Edu)
+summary(loessmodel_coxEdu)
+data.partial.Edu$loessvalues_coxEdu = predict(loessmodel_coxEdu)
+
+ggplot(data.partial.Edu, aes(x = RANK)) +
+  geom_point(aes(y = coxEdu.partial), size = 0.5) +
+  geom_line(aes(y = loessvalues_coxEdu)) +
+  theme_bw()
+
+
 # cumulative hazard function
 plot(survfit(coxEdu, newdata = data.frame(EDUCATION = 1)),
      conf.int = FALSE,

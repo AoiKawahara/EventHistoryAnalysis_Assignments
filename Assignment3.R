@@ -106,6 +106,8 @@ data$CAUSE_fac <- factor(data$CAUSE,
                          labels=c("0.Censored", "1.Cancer", "2.Circular", "3.Respiratory", "4.Other"))
 table(data$MONTH_CONT, data$CAUSE_fac)
 
+#### 1e ####
+
 #### CANCER ####
 KMactCan <- survfit(Surv(data$MONTH_CONT, data$CANCER) ~ 1 + ACTIVITY, data = data)
 
@@ -365,14 +367,14 @@ data.ppf$CAUSE_fac <- factor(data.ppf$CAUSE,
 table(data.ppf$EXPOSURE, data.ppf$CAUSE_fac)
 
 #### 2b ####
-multinom <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE) + ACTIVITY, data = data.ppf)
-summary(multinom)
-coef(multinom)
+multinomAct <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE) + as.factor(ACTIVITY), data = data.ppf)
+summary(multinomAct)
+coef(multinomAct)
 
-multinom2 <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE), data = data.ppf)
+multinomNull <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE), data = data.ppf)
 summary(multinom2)
 
-test_multinom2 <- anova(multinom2, multinom)
+test_multinomActNull <- anova(multinomNull, multinomAct)
 print(test_multinom2)
 
 #### 2c ####

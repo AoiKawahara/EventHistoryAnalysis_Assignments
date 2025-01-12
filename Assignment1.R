@@ -209,20 +209,80 @@ data$a4 = data$AGEKID2^4
 
 
 # 4th-order polynomial model
-glm5age = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2 + a2 + a3 + a4, data=data, family=binomial(link = "logit"))
-summary(glm5age)
+# age as linear
+glm5age1 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2, data=data, family=binomial(link = "logit"))
+summary(glm5age1)
 
-data$predl.glm5age = predict.glm(glm5age)
-data$predo.glm5age = exp(data$predl.glm5age)
-data$predp.glm5age = data$predo.glm5age/(1+data$predo.glm5age)
+data$predl.glm5age1 = predict.glm(glm5age1)
+data$predo.glm5age1 = exp(data$predl.glm5age1)
+data$predp.glm5age1 = data$predo.glm5age1/(1+data$predo.glm5age1)
 
-test_glm5glm5age <- anova(glm5,glm5age, test = "LRT")
-print(test_glm5glm5age)
+test_glm5glm5age1 <- anova(glm5,glm5age1, test = "LRT")
+print(test_glm5glm5age1)
 
-ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age, color=as.factor(AGEKID2))) +
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age1, color=as.factor(AGEKID2))) +
   geom_line() +
   theme_bw()
 
+# age as quadratic
+glm5age2 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2 + a2, data=data, family=binomial(link = "logit"))
+summary(glm5age2)
+
+data$predl.glm5age2 = predict.glm(glm5age2)
+data$predo.glm5age2 = exp(data$predl.glm5age2)
+data$predp.glm5age2 = data$predo.glm5age2/(1+data$predo.glm5age2)
+
+test_glm5age1glm5age2 <- anova(glm5age1,glm5age2, test = "LRT")
+print(test_glm5age1glm5age2)
+
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age2, color=as.factor(AGEKID2))) +
+  geom_line() +
+  theme_bw()
+
+
+# age as cubic
+glm5age3 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2 + a2 + a3, data=data, family=binomial(link = "logit"))
+summary(glm5age3)
+
+data$predl.glm5age3 = predict.glm(glm5age3)
+data$predo.glm5age3 = exp(data$predl.glm5age3)
+data$predp.glm5age3 = data$predo.glm5age3/(1+data$predo.glm5age3)
+
+test_glm5age1glm5age3 <- anova(glm5age1,glm5age3, test = "LRT")
+print(test_glm5age1glm5age3)
+
+# age as 4th-order
+glm5age4 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2 + a2 + a3 + a4, data=data, family=binomial(link = "logit"))
+summary(glm5age4)
+
+data$predl.glm5age4 = predict.glm(glm5age4)
+data$predo.glm5age4 = exp(data$predl.glm5age4)
+data$predp.glm5age4 = data$predo.glm5age4/(1+data$predo.glm5age4)
+
+test_glm5age1glm5age4 <- anova(glm5age1,glm5age4, test = "LRT")
+print(test_glm5age1glm5age4)
+
+# age as categorical (= general specification)
+glm5age5 = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + as.factor(AGEKID2), data=data, family=binomial(link = "logit"))
+summary(glm5age5)
+
+data$predl.glm5age5 = predict.glm(glm5age5)
+data$predo.glm5age5 = exp(data$predl.glm5age5)
+data$predp.glm5age5 = data$predo.glm5age5/(1+data$predo.glm5age5)
+
+test_glm5age1glm5age5 <- anova(glm5age1,glm5age5, test = "LRT")
+print(test_glm5age1glm5age5)
+
+ggplot(data, aes(as.numeric(EXP_LINE), predp.glm5age5, color=as.factor(AGEKID2))) +
+  geom_line() +
+  ylim(0,0.40) +
+  theme_bw()
+
+
+test_glm5age1glm5age5 <- anova(glm5age1, glm5age5, test = "LRT")
+print(test_glm5age1glm5age5)
+
+## Suggest the linear model for the effect of age
 
 #### 2d ####
 data$ASTATUS4 <- factor(data$ASTATUS4,levels=c(1,2,3,4,5), 
@@ -258,14 +318,12 @@ print(test_glm5subglm5sta)
 #### 2e ####
 # model with both age and status
 glm5netfull = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
-                 AGEKID2 + a2 + a3 + a4 +
-                 ASTATUS4,
-               data=data.substatus, family=binomial(link = "logit"))
+                 AGEKID2 + ASTATUS4,
+                 data=data.substatus, family=binomial(link = "logit"))
 summary(glm5netfull)
 
 # 4th-order polynomial specification with subset data only with age
-glm5netage = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
-                   AGEKID2 + a2 + a3 + a4,
+glm5netage = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH + AGEKID2,
                  data=data.substatus, family=binomial(link = "logit"))
 summary(glm5netage)
 
@@ -290,12 +348,16 @@ glm5netfull$ssdevres <- tapply(glm5netfull$devres^2, data.substatus$NR, sum)
 plot(glm5netfull$ssdevres,
      xlab = "Identification Number",
      ylab = "Sum of Squared Residuals")
-
+text(x = which(glm5netfull$ssdevres >= 8),
+     y = glm5netfull$ssdevres[glm5netfull$ssdevres >= 8],
+     labels = names(glm5netfull$ssdevres)[glm5netfull$ssdevres >= 8],
+     pos = 3,
+     cex = 0.8,
+     col = "red")
 glm5netfull$ssdevres
 
 #### 2g ####
 glm5netfull_cloglog = glm(BIRTH3 ~ 1 + EXP_LINE + EXP_QUAD + EXP_CUBE + EXP_4TH +
-                    AGEKID2 + a2 + a3 + a4 +
-                    ASTATUS4,
-                  data=data.substatus, family=binomial(link = "cloglog"))
+                            AGEKID2 + ASTATUS4,
+                          data=data.substatus, family=binomial(link = "cloglog"))
 summary(glm5netfull_cloglog)
