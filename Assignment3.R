@@ -370,15 +370,13 @@ table(data.ppf$EXPOSURE, data.ppf$CAUSE_fac)
 multinomAct <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE) + as.factor(ACTIVITY), data = data.ppf)
 summary(multinomAct)
 coef(multinomAct)
+exp(coef(multinomAct))
 
 multinomNull <- multinom(CAUSE ~ 1 + as.factor(EXPOSURE), data = data.ppf)
-summary(multinom2)
+summary(multinomNull)
 
 test_multinomActNull <- anova(multinomNull, multinomAct)
-print(test_multinom2)
+print(test_multinomActNull)
 
 #### 2c ####
-coxMulti <- coxph(Surv(data.ppf$EXPOSURE, data.ppf$CAUSE) ~ 1, data = data.ppf)
-summary(coxMulti)
-
 

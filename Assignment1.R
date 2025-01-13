@@ -44,6 +44,10 @@ data$predl.glm1 = predict.glm(glm1)
 data$predo.glm1 = exp(data$predl.glm1)
 data$predp.glm1 = data$predo.glm1/(1+data$predo.glm1)
 
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm1 = first(predp.glm1))
+
 ggplot(data, aes(as.numeric(EXP_LINE), predp.glm1)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +
   geom_line(aes(y = predp.glm1, group = 1), color = "darkolivegreen") +
@@ -58,6 +62,11 @@ data$predl.glm2 = predict.glm(glm2)
 data$predo.glm2 = exp(data$predl.glm2)
 data$predp.glm2 = data$predo.glm2/(1+data$predo.glm2)
 
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm2 = first(predp.glm2))
+
+
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +
   geom_line(aes(y = predp.glm2, group = 1), color = "darkolivegreen") +
@@ -71,6 +80,10 @@ summary(glm3)
 data$predl.glm3 = predict.glm(glm3)
 data$predo.glm3 = exp(data$predl.glm3)
 data$predp.glm3 = data$predo.glm3/(1+data$predo.glm3)
+
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm3 = first(predp.glm3))
 
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +
@@ -88,6 +101,10 @@ data$predl.glm4 = predict.glm(glm4)
 data$predo.glm4 = exp(data$predl.glm4)
 data$predp.glm4 = data$predo.glm4/(1+data$predo.glm4)
 
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm4 = first(predp.glm4))
+
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +
   geom_line(aes(y = predp.glm4, group = 1), color = "darkolivegreen") +
@@ -104,6 +121,10 @@ data$predl.glm5 = predict.glm(glm5)
 data$predo.glm5 = exp(data$predl.glm5)
 data$predp.glm5 = data$predo.glm5/(1+data$predo.glm5)
 
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm5 = first(predp.glm5))
+
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +
   geom_line(aes(y = predp.glm5, group = 1), color = "darkolivegreen") +
@@ -118,12 +139,16 @@ data$predl.glm6 = predict.glm(glm6)
 data$predo.glm6 = exp(data$predl.glm6)
 data$predp.glm6 = data$predo.glm6/(1+data$predo.glm6)
 
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm6 = first(predp.glm6))
+
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = predp.glm6, group = 1), color = "darkolivegreen") +
   theme_minimal()
 
 
-# step function - 分岐点調整中
+# step function
 crosstab = table(data$EXP_LINE,data$EXP_CAT4)
 print(crosstab)
 
@@ -133,6 +158,10 @@ summary(glm7)
 data$predl.glm7 = predict.glm(glm7)
 data$predo.glm7 = exp(data$predl.glm7) 
 data$predp.glm7 = data$predo.glm7/(1+data$predo.glm7)
+
+data.glm <- data %>%
+  group_by(EXP_LINE) %>%
+  summarize(predp.glm7 = first(predp.glm7))
 
 ggplot(data, aes(x = EXP_LINE)) +
   geom_line(aes(y = ht_obs, group = 1), color = "blue") +  # Connected line for ht_obs
